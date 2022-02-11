@@ -1,0 +1,12 @@
+
+def retranslateUi(self, Form):
+    _translate = QtCore.QCoreApplication.translate
+    Form.setWindowTitle(_translate("Form", "AI欢乐斗地主"))
+    self.WinRate.setText(_translate("Form", "胜率：--%"))
+    self.InitCard.setText(_translate("Form", "开始"))
+    self.UserHandCards.setText(_translate("Form", "手牌"))
+    self.LPlayedCard.setText(_translate("Form", "上家出牌区域"))
+    self.RPlayedCard.setText(_translate("Form", "下家出牌区域"))
+    self.PredictedCard.setText(_translate("Form", "AI出牌区域"))
+    self.ThreeLandlordCards.setText(_translate("Form", "三张底牌"))
+    self.Stop.setText(_translate("Form", "停止"))
