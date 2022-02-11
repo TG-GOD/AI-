@@ -1,0 +1,6 @@
+def find_landlord(self, landlord_flag_pos):
+    for pos in landlord_flag_pos:
+        result = pyautogui.locateOnScreen('pics/landlord_words.png', region=pos, confidence=self.LandlordFlagConfidence)
+        if result is not None:
+            return landlord_flag_pos.index(pos)
+    return None
