@@ -1,0 +1,5 @@
+self.MyHandCardsPos = (110, 1310, 3620, 600) # 我的截图区域
+self.LPlayedCardsPos = (880, 340, 1020, 545)  # 左边截图区域
+self.RPlayedCardsPos = (1940, 340, 1020, 545)  # 右边截图区域
+self.LandlordFlagPos = [ (105, 545, 240, 260), (640, 1190, 240, 260),  (3475, 545, 240, 260)]  # 地主标志截图区域(右-我-左)
+self.ThreeLandlordCardsPos = (1770, 50, 300, 170)     # 地主底牌截图区域，resize成349x168
