@@ -1,0 +1,88 @@
+def find_three_landlord_cards(self, pos):
+        three_landlord_cards_real = ""
+        img = pyautogui.screenshot(region=pos)
+        three_landlord_cards_real=detect_cards(img)
+        return three_landlord_cards_real
+ 
+def find_my_cards(self, pos):
+        user_hand_cards_real = ""
+        img = pyautogui.screenshot(region=pos) 
+        # img2 = color.rgb2gray(img)
+        user_hand_cards_real=detect_cards(img)
+        return user_hand_cards_real
+
+def detect_cards(img):
+    path="datas\cards.png"
+    img.save(path)
+    raw_cards=detect(source=path)
+    replace_cards=[replace_num[i] if i in replace_num else i for i in raw_cards]
+    list_cards = sorted(replace_cards, key=lambda x: ranks_value[x])
+    cards=("".join(list_cards))
+    return cards
+ 
+def detect()
+    # Initialize
+    set_logging()
+    # device = select_device(device)
+    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")#若有gpu可用则用gpu
+    # half &= device.type != 'cpu'  # half precision only supported on CUDA
+    w = weights[0] if isinstance(weights, list) else weights
+    classify, pt, onnx = False, w.endswith('.pt'), w.endswith('.onnx')  # inference type
+    stride, names = 64, [f'class{i}' for i in range(1000)]  # assign defaults
+    if pt:
+        model = attempt_load(weights, map_location=device)  # load FP32 model
+        stride = int(model.stride.max())  # model stride
+        names = model.module.names if hasattr(model, 'module') else model.names  # get class names
+        if half:
+            model.half()  # to FP16
+        if classify:  # second-stage classifier
+            modelc = load_classifier(name='resnet50', n=2)  # initialize
+            modelc.load_state_dict(torch.load('resnet50.pt', map_location=device)['model']).to(device).eval()
+    elif onnx:
+        check_requirements(('onnx', 'onnxruntime'))
+        import onnxruntime
+        session = onnxruntime.InferenceSession(w, None)
+    dataset = LoadImages(source, img_size=imgsz, stride=stride)
+    bs = 1  # batch_size
+    vid_path, vid_writer = [None] * bs, [None] * bs
+    t0 = time.time()
+ 
+    imgsz = check_img_size(imgsz, s=stride)  # check image size
+    for path, img, im0s, vid_cap in dataset:
+        if pt:
+            img = torch.from_numpy(img).to(device)
+            img = img.half() if half else img.float()  # uint8 to fp16/32
+        elif onnx:
+            img = img.astype('float32')
+        img /= 255.0  # 0 - 255 to 0.0 - 1.0
+        if len(img.shape) == 3:
+            img = img[None]  # expand for batch dim
+        # Inference
+        t1 = time_sync()
+        if pt:
+            pred = model(img, augment=augment, visualize=visualize)[0]
+        elif onnx:
+            pred = torch.tensor(session.run([session.get_outputs()[0].name], {session.get_inputs()[0].name: img}))
+        # NMS
+        pred = non_max_suppression(pred, conf_thres, iou_thres, classes, agnostic_nms, max_det=max_det)
+        t2 = time_sync()
+        # Second-stage classifier (optional)
+        if classify:
+            pred = apply_classifier(pred, modelc, img, im0s)
+        # Process predictions
+        for i, det in enumerate(pred):  # detections per image
+            p, s, im0, frame = path, '', im0s.copy(), getattr(dataset, 'frame', 0)
+            p = Path(p)  # to Path
+            gn = torch.tensor(im0.shape)[[1, 0, 1, 0]]  # normalization gain whwh
+            imc = im0.copy() if save_crop else im0  # for save_crop
+            if len(det):
+                # Rescale boxes from img_size to im0 size
+                det[:, :4] = scale_coords(img.shape[2:], det[:, :4], im0.shape).round()
+                
+                lists=[]
+                # Print results
+                for c in det[:, -1].unique():
+                    n = (det[:, -1] == c).sum()  # detections per class
+                    for i in range(n):
+                        lists.append(names[int(c)])
+        return lists
